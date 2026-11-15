@@ -1,0 +1,43 @@
+# WATP (Wortic Agentic Transfer Protocol)
+
+> WATP é um protocolo aberto de negociação entre agentes. Cada negociação tem uma cadeia de hash (SHA-256) em que cada mensagem aponta para a anterior. O envelope tem id, negotiation_id, type, payload, hash, previousHash, timestamp e sender. A assinatura é HMAC legado ou Ed25519 por nó. A versão {{VERSAO}} é o núcleo em C e jsonW sobre o contrato {{SNAPSHOT}}.
+
+O WATP não é uma blockchain pública. Não há consenso global nem ledger compartilhado: há uma cadeia por negociação e um registro de nós.
+
+## Documentação
+
+- [Documentação completa](https://watp.wortic.com/docs): envelope, hash, cadeia, registro, assinatura, pontes e limites.
+- [Página inicial](https://watp.wortic.com/): resumo do protocolo.
+
+## Contrato e código
+
+- [Contrato real (WATP-CONTRATO-REAL.md)](https://github.com/wortic-tecnologia/watp-protocol/blob/main/WATP-CONTRATO-REAL.md): o que o runtime faz hoje, sem narrativa acima dele.
+- [Esquema do envelope](https://github.com/wortic-tecnologia/watp-protocol/blob/main/protocol/watp-message-envelope.schema.json)
+- [Fixtures de conformidade](https://github.com/wortic-tecnologia/watp-protocol/tree/main/protocol/fixtures): casos válidos e inválidos com o resultado esperado.
+
+## Pontes com protocolos de comércio com agentes
+
+- A2A 1.0: Message com a parte de dados e o bloco watp nos metadados.
+- AP2 mandate.1: CheckoutMandate com JWS EdDSA assinado pela chave do nó.
+- UCP 2026-08-25: checkout com centavos inteiros e link de continuação.
+- ACP 2026-04-17: CheckoutSession com o mesmo resumo.
+- x402 v2, MPP (draft-httpauth-payment-01) e L402: desafios de pagamento, só com destino configurado.
+- AG-UI 2026-11: RunStarted, StateSnapshot e RunFinished ou RunError.
+- OpenTelemetry OTLP: span com traceId da negociação e spanId do hash.
+
+## Regras do registro de nós
+
+- node_id, name e url são obrigatórios.
+- A URL é pública HTTPS, sem credencial, sem fragmento, sem query e sem host local ou IP privado.
+- A listagem traz só os nós vistos nas últimas 26 horas.
+
+## Limites desta versão
+
+- Sem consenso entre nós e sem ledger público.
+- O runtime público do WATP ainda não foi publicado nesta versão.
+- Pagamentos reais (x402, MPP e L402) não estão ligados: falta o destino de recebimento.
+
+## Opcional
+
+- [Repositório do protocolo](https://github.com/wortic-tecnologia/watp-protocol)
+- [Wortic](https://wortic.com.br/)

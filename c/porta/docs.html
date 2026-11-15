@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documentação do WATP | Wortic</title>
+<meta name="description" content="Contrato do WATP: envelope, hash da cadeia, registro de nós, assinatura, pontes para A2A, AP2, UCP, ACP, x402, MPP, L402, AG-UI e OpenTelemetry, e os limites desta versão.">
+<link rel="canonical" href="https://watp.wortic.com/docs">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"Documentação do WATP","url":"https://watp.wortic.com/docs","inLanguage":"pt-BR","version":"{{VERSAO}}","about":"WATP, Wortic Agentic Transfer Protocol","isPartOf":{"@type":"WebSite","name":"WATP","url":"https://watp.wortic.com/"}}
+</script>
+<style>
+/* watp.css: o visual do WATP, com os tokens do site da Wortic (v5): tinta, cinza, painel, linha, azul e a pilha de fontes. */
+:root { --tinta:#1d1d1f; --cinza:#6e6e73; --fundo:#fff; --painel:#f5f5f7; --linha:#d2d2d7; --azul:#0049ff; --fonte:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Helvetica Neue",Arial,sans-serif; --largura:980px; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--fundo); color:var(--tinta); font:17px/1.47 var(--fonte); -webkit-font-smoothing:antialiased; }
+a { color:var(--azul); text-decoration:none; }
+.topo { position:sticky; top:0; background:rgba(255,255,255,.82); backdrop-filter:saturate(180%) blur(20px); border-bottom:1px solid var(--linha); z-index:2; }
+.dentro { max-width:calc(var(--largura) + 44px); margin:0 auto; padding:0 22px; display:flex; align-items:center; justify-content:space-between; height:48px; }
+.marca { color:var(--tinta); font-weight:600; font-size:17px; }
+.topo nav a { color:var(--tinta); font-size:13px; margin-left:22px; }
+main { max-width:var(--largura); margin:0 auto; padding:0 22px; }
+.abertura { padding:96px 0 64px; text-align:left; }
+.rotulo { color:var(--cinza); font-size:14px; margin:0 0 10px; }
+h1 { font-size:56px; line-height:1.07; letter-spacing:-.015em; font-weight:600; margin:0 0 20px; }
+.lead { font-size:21px; line-height:1.4; color:var(--cinza); max-width:720px; margin:0 0 30px; }
+.acoes { display:flex; gap:22px; align-items:center; }
+.botao { background:var(--azul); color:#fff; padding:12px 22px; border-radius:980px; font-size:17px; }
+.link { font-size:17px; }
+.faixa { display:grid; grid-template-columns:repeat(3,1fr); gap:28px; padding:48px 0; border-top:1px solid var(--linha); border-bottom:1px solid var(--linha); }
+.faixa div { display:flex; flex-direction:column; gap:8px; }
+.faixa strong { font-size:19px; font-weight:600; }
+.faixa span { color:var(--cinza); font-size:15px; }
+.secao { padding:72px 0 8px; }
+h2 { font-size:34px; line-height:1.15; font-weight:600; letter-spacing:-.01em; margin:0 0 14px; }
+.secao p { color:var(--cinza); max-width:760px; }
+.tabela { width:100%; border-collapse:collapse; margin-top:22px; font-size:15px; }
+.tabela th, .tabela td { text-align:left; padding:12px 10px; border-bottom:1px solid var(--linha); vertical-align:top; }
+.tabela th { color:var(--cinza); font-weight:500; font-size:13px; }
+.lista { color:var(--cinza); padding-left:20px; max-width:760px; }
+.lista li { margin-bottom:8px; }
+code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.9em; background:var(--painel); padding:1px 5px; border-radius:5px; }
+.doc { padding:72px 0 24px; max-width:760px; }
+.doc h2 { font-size:24px; margin-top:44px; }
+.doc p { color:var(--tinta); }
+.doc .lead { color:var(--cinza); }
+.rodape { background:var(--painel); color:var(--cinza); font-size:12px; margin-top:96px; padding:22px 0; }
+.rodape .dentro { height:auto; flex-wrap:wrap; gap:8px; }
+@media (max-width:760px) { h1 { font-size:40px; } .faixa { grid-template-columns:1fr; } .topo nav a { margin-left:12px; } }
+</style>
+</head>
+<body>
+<header class="topo"><div class="dentro"><a class="marca" href="/">WATP</a><nav><a href="/docs">Documentação</a><a href="/llms.txt">Para agentes</a><a href="https://github.com/wortic-tecnologia/watp-protocol">GitHub</a></nav></div></header>
+<main class="doc">
+<h1>Documentação do WATP</h1>
+<p class="lead">Versão do núcleo {{VERSAO}}, sobre o contrato {{SNAPSHOT}}. Esta página resume o que o protocolo exige. O texto completo do contrato está no repositório público.</p>
+
+<h2>1. Envelope</h2>
+<p>Cada mensagem tem estes campos. Os nomes são os canônicos; o leitor aceita os aliases <code>prev_hash</code> (no lugar de <code>previousHash</code>), <code>quantity</code> e <code>price</code> (dentro do payload).</p>
+<table class="tabela">
+  <thead><tr><th>Campo</th><th>Obrigatório</th><th>Uso</th></tr></thead>
+  <tbody>
+    <tr><td><code>id</code></td><td>sim</td><td>idempotência e proteção contra replay</td></tr>
+    <tr><td><code>negotiation_id</code></td><td>sim, exceto em HASH_INTEREST</td><td>a negociação a que a mensagem pertence</td></tr>
+    <tr><td><code>type</code></td><td>sim</td><td>HASH_INTEREST, HASH_PROPOSAL, HASH_COUNTER, HASH_CONCLUDED, HASH_CANCELLED, HASH_WAITING_HUMAN</td></tr>
+    <tr><td><code>payload</code></td><td>sim</td><td>item, sku, quantidade, preço e campos da negociação</td></tr>
+    <tr><td><code>hash</code></td><td>sim</td><td>SHA-256 do texto canônico, em 64 caracteres hexadecimais</td></tr>
+    <tr><td><code>previousHash</code></td><td>sim depois de HASH_INTEREST</td><td>o hash da mensagem anterior da negociação</td></tr>
+    <tr><td><code>timestamp</code></td><td>sim</td><td>instante UTC com microssegundos</td></tr>
+    <tr><td><code>sender</code></td><td>sim</td><td>o nó que emite</td></tr>
+  </tbody>
+</table>
+
+<h2>2. Hash</h2>
+<p>O hash é o SHA-256 do texto <code>{"type":…,"payload":…,"previousHash":…,"timestamp":…}</code>, nessa ordem, sem espaço. O payload entra com a ordem de chegada das chaves. Número inteiro sai sem casas decimais, como <code>100</code> e não <code>100.0</code>. A fixture <code>valid-hash-interest.json</code> é a referência.</p>
+
+<h2>3. Cadeia por negociação</h2>
+<p>HASH_INTEREST abre a negociação. Os demais tipos continuam a partir do último hash: um <code>previousHash</code> que não é o último da negociação é recusado. Um hash já visto na negociação é repetição e não entra de novo.</p>
+
+<h2>4. Registro de nós</h2>
+<p>O registro guarda <code>node_id</code>, nome, URL e plataforma. A URL precisa ser pública e HTTPS, sem credencial, sem fragmento e sem query nos nós. Não são aceitos localhost, <code>.local</code>, <code>.internal</code> nem IP privado. A listagem mostra só os nós vistos nas últimas 26 horas.</p>
+
+<h2>5. Assinatura</h2>
+<p>O cabeçalho legado <code>X-WATP-Node-Signature</code> é <code>sha256=</code> seguido do HMAC-SHA256 do corpo bruto, com o segredo do par. A assinatura forte por nó é Ed25519 sobre o texto <code>WATP-ED25519-V1</code>, o remetente e o hash, separados por quebra de linha. Assim a assinatura não serve para outro remetente.</p>
+
+<h2>6. Pontes</h2>
+<p>Cada ponte leva o envelope para um protocolo de comércio com agentes e volta pela mesma validação. O mandato AP2 é um JWS EdDSA assinado pela chave do nó. Os desafios de pagamento (x402, MPP e L402) só saem com um destino de recebimento configurado: a casa não tem carteira nem nó Lightning neste momento.</p>
+
+<h2>7. Conformidade</h2>
+<p>O validador de conformidade lê as fixtures do repositório público e reproduz as mesmas linhas do validador de referência em JavaScript. Ele também confere os exemplos do esquema e os vetores de HMAC e de hash.</p>
+
+<h2>8. Limites desta versão</h2>
+<ul class="lista">
+  <li>Não há consenso entre nós e não há ledger público.</li>
+  <li>A janela de tempo das mensagens novas não está no contrato e não é aplicada.</li>
+  <li>O razão em jsonW é um arquivo por nó. A replicação entre nós ainda não existe.</li>
+  <li>Os pagamentos reais (x402, MPP e L402) não estão ligados: falta o destino de recebimento.</li>
+  <li>O runtime público do WATP ainda não foi publicado nesta versão.</li>
+</ul>
+</main>
+<footer class="rodape"><div class="dentro"><span>WATP é um protocolo aberto da Wortic. Copyright © 2026 Wortic. Todos os direitos reservados.</span> <a href="https://wortic.com.br/">wortic.com.br</a></div></footer>
+</body>
+</html>

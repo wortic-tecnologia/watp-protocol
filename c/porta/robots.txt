@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://watp.wortic.com/sitemap.xml
