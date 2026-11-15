@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WATP: protocolo de negociação entre agentes | Wortic</title>
+<meta name="description" content="WATP é o protocolo aberto de negociação entre agentes: cada negociação tem sua cadeia de hash, a assinatura é do nó, e o envelope casa com A2A, AP2, UCP, ACP, x402, MPP, L402, AG-UI e OpenTelemetry.">
+<link rel="canonical" href="https://watp.wortic.com/">
+<link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt">
+<meta name="robots" content="index, follow">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","name":"WATP: protocolo de negociação entre agentes","headline":"WATP, Wortic Agentic Transfer Protocol","description":"Protocolo aberto de negociação entre agentes com cadeia de hash por negociação, registro de nós e assinatura por nó.","url":"https://watp.wortic.com/","inLanguage":"pt-BR","version":"{{VERSAO}}","isPartOf":{"@type":"WebSite","name":"WATP","url":"https://watp.wortic.com/"},"publisher":{"@type":"Organization","name":"Wortic","url":"https://wortic.com.br/"},"license":"https://wortic.com.br/termos"}
+</script>
+<style>
+/* watp.css: o visual do WATP, com os tokens do site da Wortic (v5): tinta, cinza, painel, linha, azul e a pilha de fontes. */
+:root { --tinta:#1d1d1f; --cinza:#6e6e73; --fundo:#fff; --painel:#f5f5f7; --linha:#d2d2d7; --azul:#0049ff; --fonte:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Helvetica Neue",Arial,sans-serif; --largura:980px; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--fundo); color:var(--tinta); font:17px/1.47 var(--fonte); -webkit-font-smoothing:antialiased; }
+a { color:var(--azul); text-decoration:none; }
+.topo { position:sticky; top:0; background:rgba(255,255,255,.82); backdrop-filter:saturate(180%) blur(20px); border-bottom:1px solid var(--linha); z-index:2; }
+.dentro { max-width:calc(var(--largura) + 44px); margin:0 auto; padding:0 22px; display:flex; align-items:center; justify-content:space-between; height:48px; }
+.marca { color:var(--tinta); font-weight:600; font-size:17px; }
+.topo nav a { color:var(--tinta); font-size:13px; margin-left:22px; }
+main { max-width:var(--largura); margin:0 auto; padding:0 22px; }
+.abertura { padding:96px 0 64px; text-align:left; }
+.rotulo { color:var(--cinza); font-size:14px; margin:0 0 10px; }
+h1 { font-size:56px; line-height:1.07; letter-spacing:-.015em; font-weight:600; margin:0 0 20px; }
+.lead { font-size:21px; line-height:1.4; color:var(--cinza); max-width:720px; margin:0 0 30px; }
+.acoes { display:flex; gap:22px; align-items:center; }
+.botao { background:var(--azul); color:#fff; padding:12px 22px; border-radius:980px; font-size:17px; }
+.link { font-size:17px; }
+.faixa { display:grid; grid-template-columns:repeat(3,1fr); gap:28px; padding:48px 0; border-top:1px solid var(--linha); border-bottom:1px solid var(--linha); }
+.faixa div { display:flex; flex-direction:column; gap:8px; }
+.faixa strong { font-size:19px; font-weight:600; }
+.faixa span { color:var(--cinza); font-size:15px; }
+.secao { padding:72px 0 8px; }
+h2 { font-size:34px; line-height:1.15; font-weight:600; letter-spacing:-.01em; margin:0 0 14px; }
+.secao p { color:var(--cinza); max-width:760px; }
+.tabela { width:100%; border-collapse:collapse; margin-top:22px; font-size:15px; }
+.tabela th, .tabela td { text-align:left; padding:12px 10px; border-bottom:1px solid var(--linha); vertical-align:top; }
+.tabela th { color:var(--cinza); font-weight:500; font-size:13px; }
+.lista { color:var(--cinza); padding-left:20px; max-width:760px; }
+.lista li { margin-bottom:8px; }
+code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.9em; background:var(--painel); padding:1px 5px; border-radius:5px; }
+.doc { padding:72px 0 24px; max-width:760px; }
+.doc h2 { font-size:24px; margin-top:44px; }
+.doc p { color:var(--tinta); }
+.doc .lead { color:var(--cinza); }
+.rodape { background:var(--painel); color:var(--cinza); font-size:12px; margin-top:96px; padding:22px 0; }
+.rodape .dentro { height:auto; flex-wrap:wrap; gap:8px; }
+@media (max-width:760px) { h1 { font-size:40px; } .faixa { grid-template-columns:1fr; } .topo nav a { margin-left:12px; } }
+</style>
+</head>
+<body>
+<header class="topo"><div class="dentro"><a class="marca" href="/">WATP</a><nav><a href="/docs">Documentação</a><a href="/llms.txt">Para agentes</a><a href="https://github.com/wortic-tecnologia/watp-protocol">GitHub</a></nav></div></header>
+<main>
+<section class="abertura">
+  <p class="rotulo">Protocolo aberto · versão {{VERSAO}}</p>
+  <h1>Agentes negociam com prova.</h1>
+  <p class="lead">O WATP é o protocolo com que um agente propõe, contrapropõe e fecha uma compra com outro agente. Cada mensagem tem um hash ligado ao anterior, então a negociação inteira pode ser conferida por quem não participou dela.</p>
+  <div class="acoes"><a class="botao" href="/docs">Ler a especificação</a><a class="link" href="https://github.com/wortic-tecnologia/watp-protocol">Código no GitHub</a></div>
+</section>
+
+<section class="faixa">
+  <div><strong>Cadeia de hash</strong><span>Cada negociação é uma sequência de mensagens. O hash de cada uma inclui o anterior, e uma mudança em qualquer ponto aparece na conferência.</span></div>
+  <div><strong>Assinatura por nó</strong><span>O nó assina com Ed25519 a mensagem e o remetente. O HMAC legado segue aceito para os nós que ainda não migraram.</span></div>
+  <div><strong>Idempotência</strong><span>Um reenvio idêntico não é processado de novo. O mesmo id com outro conteúdo é tratado como replay e recusado.</span></div>
+</section>
+
+<section class="secao">
+  <h2>Um envelope, todos os protocolos</h2>
+  <p>A mesma negociação sai em cada protocolo de comércio com agentes, sem perder o hash. A volta a partir de cada formato passa pela mesma validação.</p>
+  <table class="tabela">
+    <thead><tr><th>Protocolo</th><th>O que a ponte leva</th></tr></thead>
+    <tbody>
+      <tr><td>A2A 1.0</td><td>Message com a parte de dados e o bloco watp nos metadados</td></tr>
+      <tr><td>AP2 (mandato)</td><td>CheckoutMandate com JWS EdDSA assinado pelo nó e o checkout_hash</td></tr>
+      <tr><td>UCP 2026-08-25</td><td>Checkout com centavos inteiros e link de continuação</td></tr>
+      <tr><td>ACP 2026-04-17</td><td>CheckoutSession com o mesmo resumo do checkout</td></tr>
+      <tr><td>x402 v2</td><td>Desafio 402 com o valor atômico, só com destino configurado</td></tr>
+      <tr><td>MPP (draft-httpauth-payment-01)</td><td>Desafio Payment com o hash como id, só com destino configurado</td></tr>
+      <tr><td>L402</td><td>Desafio com macaroon e fatura, só com fatura dada por um nó Lightning</td></tr>
+      <tr><td>AG-UI 2026-11</td><td>RunStarted, StateSnapshot e RunFinished ou RunError</td></tr>
+      <tr><td>OpenTelemetry (OTLP)</td><td>Span com traceId da negociação e spanId do hash</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="secao">
+  <h2>Feito em C e jsonW</h2>
+  <p>O núcleo é uma biblioteca em C sem dependências além da libcrypto e da lib jsonW da casa. Dentro do programa, o envelope é um registro. No disco, cada mensagem aceita vira uma linha do razão em jsonW. Texto de fora entra e sai só na borda.</p>
+  <ul class="lista">
+    <li>Conformidade: as fixtures do repositório público passam, e as inválidas reprovam com a mesma mensagem do validador de referência.</li>
+    <li>Compatibilidade: o hash é o mesmo byte a byte do runtime antigo, incluindo o caso de preço inteiro.</li>
+    <li>Prova: a suíte de testes roda com ASan e UBSan, sem aviso com -Wall -Wextra.</li>
+  </ul>
+</section>
+
+<section class="secao">
+  <h2>Estado desta versão</h2>
+  <p>O WATP não é uma blockchain pública e não tem consenso global. É uma rede federada de descoberta e negociação. Esta versão é o núcleo em C e a especificação. O runtime público ainda não está no ar nesta versão: esta página mostra o protocolo, e o endpoint de saúde mostra o que está rodando.</p>
+  <p><a class="link" href="/docs">Ver o contrato, as fixtures e os limites</a></p>
+</section>
+</main>
+<footer class="rodape"><div class="dentro"><span>WATP é um protocolo aberto da Wortic. Copyright © 2026 Wortic. Todos os direitos reservados.</span> <a href="https://wortic.com.br/">wortic.com.br</a></div></footer>
+</body>
+</html>

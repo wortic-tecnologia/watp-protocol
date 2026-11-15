@@ -13,3 +13,24 @@ jobs:
         with:
           node-version: '20'
       - run: node scripts/watp-validate-contract-fixtures.mjs
+
+  c:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dependências do núcleo C
+        run: sudo apt-get update && sudo apt-get install -y libssl-dev libpq-dev
+      - name: Lib jsonW presente?
+        id: lib
+        run: |
+          if [ -f c/lib/wjsw.h ]; then echo "pronta=sim" >> "$GITHUB_OUTPUT"; else echo "lib jsonW ausente em c/lib: a prova C não roda neste repositório" ; echo "pronta=nao" >> "$GITHUB_OUTPUT"; fi
+      - name: Compilar e provar (normal e ASan/UBSan)
+        if: steps.lib.outputs.pronta == 'sim'
+        working-directory: c
+        run: |
+          make
+          ./bin/watp-conformidade ../
+          ./bin/teste_watp
+          make asan
+          ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 UBSAN_OPTIONS=halt_on_error=1 ./bin/watp-conformidade_asan ../
+          ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 UBSAN_OPTIONS=halt_on_error=1 ./bin/teste_watp_asan
